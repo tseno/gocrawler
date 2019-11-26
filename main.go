@@ -1,14 +1,59 @@
 package main
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
+var FEED_URL string = "http://b.hatena.ne.jp/entrylist.rss"
+
+type HatenaBookmark struct {
+	Title []string `xml:"item>title"`
+	Link  []string `xml:"item>link"`
+}
+
 func main() {
-	Machikon()
+	hb, err := getHatenaBookmark(FEED_URL)
+
+	if err != nil {
+		log.Fatalf("Log: %v", err)
+		return
+	}
+
+	fmt.Println(hb.Title)
+	for n, v := range hb.Link {
+		if n > 0 {
+			fmt.Printf("%s \n", v)
+		}
+	}
+}
+
+// getHatenaBookmark ははてブを読み取って構造体に入れる
+func getHatenaBookmark(feed string) (p *HatenaBookmark, err error) {
+
+	// feedのURLからXMLを取得
+	res, err := http.Get(feed)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	// 構造体作成
+	wh := new(HatenaBookmark)
+	// XMLをパース
+	err = xml.Unmarshal(b, &wh)
+	log.Printf("%#v", wh)
+
+	return wh, err
 }
 
 // Machikon は街コンサイトの一覧を出力する。
