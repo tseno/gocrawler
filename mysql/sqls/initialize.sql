@@ -10,4 +10,7 @@ CREATE TABLE hatebu (
   primary key (id)
 );
 
-ALTER TABLE hatebu ADD INDEX link_index(link)
+
+ALTER TABLE hatebu ADD UNIQUE(link)
+
+
